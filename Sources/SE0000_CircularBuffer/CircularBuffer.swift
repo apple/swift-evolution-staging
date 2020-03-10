@@ -10,6 +10,74 @@
 //
 //===----------------------------------------------------------------------===//
 
+/**
+ An ordered, random-access collection.
+
+ You can use circular buffer instead of an array when you need fast
+ front and back insertions and deletion together with fast subsript
+ element access.
+
+ When CircularBuffer is full, new data will be written to the beginning
+ and old will be overridden.
+
+ Example:
+ ~~~
+ var circularBuffer = CircularBuffer<Int>(capacity: 2)
+ circularBuffer.pushBack(1)
+ circularBuffer.pushBack(2)
+
+ print(circularBuffer)
+ // Prints "[1, 2]"
+ circularBuffer.pushBack(3)
+
+ print(circularBuffer)
+ // Prints "[2, 3]"
+ ~~~
+
+ You can manually increase CircularBuffer size using resize(newCapacity: ) method
+
+ Example:
+ ~~~
+ var circularBuffer = CircularBuffer<Int>(capacity: 2)
+ circularBuffer.pushBack(1)
+ circularBuffer.pushBack(2)
+ circularBuffer.pushBack(3)
+ print(circularBuffer)
+ // Prints "[2, 3]"
+
+ circularBuffer.resize(newCapacity: 3)
+ circularBuffer.pushBack(4)
+ print(circularBuffer)
+ // Prints "[2, 3, 4]"
+ ~~~
+
+ CircularBuffer supports both front and back insertion and deletion.
+ ~~~
+ var circularBuffer = CircularBuffer<Int>(capacity: 2)
+ circularBuffer.pushBack(1)
+ circularBuffer.pushFront(2)
+ print(circularBuffer)
+ // Prints "[2, 3]"
+ // Now buffer isFull so next
+ // writes will override data at beggining
+
+ circularBuffer.pushFront(4)
+ print(circularBuffer)
+ // Prints "[4, 2]"
+
+ circularBuffer.pushBack(3)
+ print(circularBuffer)
+ // Prints "[2, 3]"
+
+ circularBuffer.popFront()
+ print(circularBuffer)
+ // Prints "[3]"
+
+ circularBuffer.popBack()
+ print(circularBuffer)
+ // Prints "[]"
+ ~~~
+ */
 public struct CircularBuffer<Element>: RandomAccessCollection, RangeReplaceableCollection {
 
   public typealias Element = Element
@@ -22,20 +90,48 @@ public struct CircularBuffer<Element>: RandomAccessCollection, RangeReplaceableC
 
   public typealias SubSequence = Slice<CircularBuffer<Element>>
 
-  public var _buffer: CircularBufferBuffer<Element>
+  private var _buffer: CircularBufferBuffer<Element>
 
   public init(capacity: Int) {
     _buffer = CircularBufferBuffer<Element>(capacity: capacity)
   }
 
+  /// A boolean value indicating that CircularBuffer is full.
   public var isFull: Bool {
     return _buffer.isFull
   }
 
+  /**
+   A total number of elements that CircularBuffer can contain
+   without allocating new storage.
+ */
   public var capacity: Int {
     return _buffer.capacity
   }
 
+  /**
+  CircularBuffer does not increase capacity automatically when it is full
+   except for RandomAccessCollection conformance functions.
+  You can manually increase capacity if you need to store more elements.
+
+   New capacity must be greater of equal zero.
+  Example:
+  ~~~
+  var circularBuffer = CircularBuffer<Int>(capacity: 2)
+  circularBuffer.pushBack(1)
+  circularBuffer.pushBack(2)
+  circularBuffer.pushBack(3)
+  print(circularBuffer)
+  // Prints "[2, 3]"
+
+  circularBuffer.resize(newCapacity: 3)
+  circularBuffer.pushBack(4)
+  print(circularBuffer)
+  // Prints "[2, 3, 4]"
+  ~~~
+
+  - Parameter newCapacity: The element to append to the CircularBuffer
+  */
   public mutating func resize(newCapacity: Int) {
     precondition(newCapacity >= 0)
 
@@ -45,6 +141,180 @@ public struct CircularBuffer<Element>: RandomAccessCollection, RangeReplaceableC
       let bufferCopy = _buffer.copy(newCapacity: newCapacity)
       self._buffer = bufferCopy
     }
+  }
+}
+
+public extension CircularBuffer {
+
+  /**
+   Pushes element to the back of the CircularBuffer without increasing its capacity.
+   If the CircularBuffer does not have sufficient capacity for another element,
+   additional storage will not be allocated. An oldest element will be removed.
+
+   Example:
+   ~~~
+   var circularBuffer = CircularBuffer<Int>(capacity: 2)
+   circularBuffer.pushBack(1)
+   circularBuffer.pushBack(2)
+
+   print(circularBuffer)
+   // Prints "[1, 2]"
+   circularBuffer.pushBack(3)
+
+   print(circularBuffer)
+   // Prints "[2, 3]"
+   ~~~
+
+   - Parameter newElement: The element to append to the CircularBuffer
+
+   Complexity: O(1).
+   */
+  mutating func pushBack(_ newElement: Element) {
+    makeUnique()
+
+    _buffer.pushBack(newElement)
+  }
+
+  /**
+   Pushes element to the back of the CircularBuffer without increasing its capacity.
+   If the CircularBuffer does not have sufficient capacity for another element,
+   additional storage will not be allocated. An oldest elements will be removed.
+   
+   Example:
+   ~~~
+   var circularBuffer = CircularBuffer<Int>(capacity: 2)
+   circularBuffer.pushBack(contentsOf: [2, 3])
+   print(circularBuffer)
+   // Prints "[1, 2]"
+
+   circularBuffer.pushBack(contentsOf: [3, 4])
+   print(circularBuffer)
+   // Prints "[3, 4]"
+   ~~~
+
+   Complexity: O(m), where m is the length of the elements.
+
+   - Parameter newElements: The elements to append to the CircularBuffer
+   */
+  mutating func pushBack<S>(contentsOf newElements: S) where S: Sequence, Element == S.Element {
+    makeUnique()
+
+    for newElement in newElements {
+      _buffer.pushBack(newElement)
+    }
+  }
+
+  /**
+  Pushes element to the front of the CircularBuffer without increasing its capacity.
+  If the CircularBuffer does not have sufficient capacity for another element,
+  additional storage will not be allocated. An oldest element will be removed.
+
+  Example:
+  ~~~
+  var circularBuffer = CircularBuffer<Int>(capacity: 2)
+  circularBuffer.pushFront(1)
+  circularBuffer.pushFront(2)
+  print(circularBuffer)
+  // Prints "[2, 1]"
+
+  circularBuffer.pushFront(3)
+  print(circularBuffer)
+  // Prints "[3, 2]"
+  ~~~
+
+  - Parameter newElement: The element to append to the CircularBuffer
+
+  Complexity: O(1).
+  */
+  mutating func pushFront(_ newElement: Element) {
+    makeUnique()
+
+    _buffer.pushFront(newElement)
+  }
+
+  /**
+  Pushes elements to the front of the CircularBuffer without increasing its capacity.
+  If the CircularBuffer does not have sufficient capacity for another element,
+  additional storage will not be allocated. An oldest element will be removed.
+
+  Example:
+  ~~~
+  var circularBuffer = CircularBuffer<Int>(capacity: 2)
+  circularBuffer.pushFront(contentsOf: [1, 2])
+  print(circularBuffer)
+  // Prints "[2, 1]"
+
+  circularBuffer.pushFront(contentsOf: [3, 4])
+  print(circularBuffer)
+  // Prints "[4, 3]"
+  ~~~
+
+  Complexity: O(m), where m is the length of the elements.
+
+   - Parameter newElements: The elements to append to the CircularBuffer
+  */
+  mutating func pushFront<S>(contentsOf newElements: S) where S: Sequence, Element == S.Element {
+    makeUnique()
+
+    for newElement in newElements {
+      _buffer.pushFront(newElement)
+    }
+  }
+
+  /**
+  Removes and returns element from the back of the CircularBuffer.
+
+   The CircularBuffer must not be empty.
+
+  Example:
+  ~~~
+  var circularBuffer = CircularBuffer<Int>(capacity: 2)
+  circularBuffer.pushBack(1)
+  circularBuffer.pushBack(2)
+  print(circularBuffer.popBack())
+  // Prints "2"
+
+  circularBuffer.pushBack(3)
+  print(circularBuffer.popBack())
+  // Prints "3"
+  ~~~
+
+  Complexity: O(1).
+  */
+  @discardableResult
+  mutating func popBack() -> Element {
+    precondition(count > 0)
+    makeUnique()
+
+    return _buffer.popBack()
+  }
+
+  /**
+  Removes and returns element from the front of the CircularBuffer.
+
+   The CircularBuffer must not be empty.
+
+  Example:
+  ~~~
+  var circularBuffer = CircularBuffer<Int>(capacity: 2)
+  circularBuffer.pushFront(1)
+  circularBuffer.pushFront(2)
+  print(circularBuffer.popFront())
+  // Prints "2"
+
+  circularBuffer.pushFront(3)
+  print(circularBuffer.popFront())
+  // Prints "3"
+  ~~~
+
+  Complexity: O(1).
+  */
+  @discardableResult
+  mutating func popFront() -> Element {
+    precondition(count > 0)
+    makeUnique()
+
+    return _buffer.popFront()
   }
 }
 
@@ -117,51 +387,6 @@ public extension CircularBuffer {
 
   func formIndex(_ i: inout Int, offsetBy distance: Int) {
     i += distance
-  }
-}
-
-public extension CircularBuffer {
-
-  mutating func pushBack(_ newElement: Element) {
-    makeUnique()
-
-    _buffer.pushBack(newElement)
-  }
-
-  mutating func pushBack<S>(contentsOf newElements: S) where S: Sequence, Element == S.Element {
-    makeUnique()
-
-    for newElement in newElements {
-      _buffer.pushBack(newElement)
-    }
-  }
-
-  mutating func pushFront(_ newElement: Element) {
-    makeUnique()
-
-    _buffer.pushFront(newElement)
-  }
-
-  mutating func pushFront<S>(contentsOf newElements: S) where S: Sequence, Element == S.Element {
-    makeUnique()
-
-    for newElement in newElements {
-      _buffer.pushFront(newElement)
-    }
-  }
-
-  @discardableResult
-  mutating func popBack() -> Element {
-    makeUnique()
-
-    return _buffer.popBack()
-  }
-
-  @discardableResult
-  mutating func popFront() -> Element {
-    makeUnique()
-
-    return _buffer.popFront()
   }
 }
 
@@ -385,7 +610,7 @@ extension CircularBuffer: Equatable where Element: Equatable {
   }
 }
 
-public final class CircularBufferBuffer<Element> {
+private final class CircularBufferBuffer<Element> {
 
   private var _elements: UnsafeMutablePointer<Element>
 

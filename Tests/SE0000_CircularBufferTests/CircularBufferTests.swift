@@ -710,4 +710,12 @@ final class SENNNN_CircularBufferTests: XCTestCase {
     XCTAssertEqual("CircularBuffer([1, 2, 3])", CircularBuffer([1, 2, 3]).debugDescription)
     XCTAssertEqual("CircularBuffer([\"1\", \"2\", \"3\"])", CircularBuffer(["1", "2", "3"]).debugDescription)
   }
+
+  // MARK: CircularBuffer Equatable test
+
+  func testEquatable() {
+    XCTAssertEqual(CircularBuffer<Int>([1, 2, 3]) == CircularBuffer<Int>([1, 2, 3]), true)
+    XCTAssertEqual(CircularBuffer<Int>([1, 2, 3]) == CircularBuffer<Int>([1, 2]), false)
+    XCTAssertEqual(CircularBuffer<Int>([1, 2, 3]) != CircularBuffer<Int>([1, 2]), true)
+  }
 }
