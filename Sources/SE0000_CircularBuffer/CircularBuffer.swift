@@ -18,7 +18,7 @@
  element access.
 
  When CircularBuffer is full, new data will be written to the beginning
- and old will be overridden.
+ and old will be overwritten.
 
  Example:
  ~~~
@@ -57,9 +57,8 @@
  circularBuffer.pushBack(1)
  circularBuffer.pushFront(2)
  print(circularBuffer)
- // Prints "[2, 3]"
- // Now buffer isFull so next
- // writes will override data at beggining
+ // Prints "[2, 1]"
+ // Now buffer isFull so next writes will overwrite data at beggining
 
  circularBuffer.pushFront(4)
  print(circularBuffer)
@@ -69,7 +68,9 @@
  print(circularBuffer)
  // Prints "[2, 3]"
 
- circularBuffer.popFront()
+ print(circularBuffer.popFront())
+ // Prints "2"
+
  print(circularBuffer)
  // Prints "[3]"
 
@@ -78,7 +79,7 @@
  // Prints "[]"
  ~~~
  */
-public struct CircularBuffer<Element>: RandomAccessCollection, RangeReplaceableCollection {
+public struct CircularBuffer<Element>: RandomAccessCollection, RangeReplaceableCollection, MutableCollection {
 
   public typealias Element = Element
 
@@ -607,6 +608,15 @@ extension CircularBuffer: Equatable where Element: Equatable {
 
   public static func != (lhs: CircularBuffer<Element>, rhs: CircularBuffer<Element>) -> Bool {
     return !(lhs == rhs)
+  }
+}
+
+extension CircularBuffer: Hashable where Element: Hashable {
+
+  public func hash(into hasher: inout Hasher) {
+    for element in self {
+      hasher.combine(element)
+    }
   }
 }
 
