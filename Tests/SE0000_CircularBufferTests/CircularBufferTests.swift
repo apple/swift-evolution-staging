@@ -309,6 +309,16 @@ final class SENNNN_CircularBufferTests: XCTestCase {
     XCTAssertEqual(circularBuffer[0...2].map { $0 }, [4, 1, 2])
     circularBuffer.pushFront(5)
     XCTAssertEqual(circularBuffer[0...2].map { $0  }, [5, 4, 1])
+    XCTAssertEqual(circularBuffer.index(after: 0), 1)
+    XCTAssertEqual(circularBuffer.index(before: 1), 0)
+    XCTAssertEqual(circularBuffer.index(0, offsetBy: 1), 1)
+    var index = 0
+    circularBuffer.formIndex(after: &index)
+    XCTAssertEqual(index, 1)
+    circularBuffer.formIndex(before: &index)
+    XCTAssertEqual(index, 0)
+    circularBuffer.formIndex(&index, offsetBy: 1)
+    XCTAssertEqual(index, 1)
   }
 
   func testRandomAccessCollectionMethodsCOW() {
