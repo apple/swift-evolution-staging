@@ -505,7 +505,9 @@ final class SENNNN_CircularBufferTests: XCTestCase {
     var circularBuffer = makeCircularBuffer(frontSequence: [1], backSequence: [2, 3], capacity: 3)
     circularBuffer.pushFront(4)
     XCTAssertEqual(circularBuffer, [4, 1, 2])
-    circularBuffer.reserveCapacity(2)
+    circularBuffer.reserveCapacity(1)
+    XCTAssertEqual(circularBuffer.capacity, 3)
+    circularBuffer.reserveCapacity(5)
     circularBuffer.pushBack(5)
     circularBuffer.pushFront(6)
     XCTAssertEqual(circularBuffer, [6, 4, 1, 2, 5])
@@ -522,7 +524,7 @@ final class SENNNN_CircularBufferTests: XCTestCase {
     var copy = circularBuffer
     XCTAssertEqual(copy.capacity, 3)
 
-    copy.reserveCapacity(1)
+    copy.reserveCapacity(4)
     XCTAssertEqual(circularBuffer.capacity, 3)
     XCTAssertEqual(copy.capacity, 4)
   }
