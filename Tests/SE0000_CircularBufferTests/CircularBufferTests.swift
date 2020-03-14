@@ -437,13 +437,13 @@ final class SENNNN_CircularBufferTests: XCTestCase {
   func testInsertSingleElementAtIndex() {
     var circularBuffer = makeCircularBuffer(frontSequence: [2, 1], backSequence: [3, 4, 5], capacity: 5)
     circularBuffer.insert(6, at: 0)
-    XCTAssertEqual(circularBuffer.capacity, 6)
+    XCTAssertEqual(circularBuffer.capacity, 7)
     XCTAssertEqual(circularBuffer, [6, 1, 2, 3, 4, 5])
     circularBuffer.insert(7, at: 6)
     XCTAssertEqual(circularBuffer.capacity, 7)
     XCTAssertEqual(circularBuffer, [6, 1, 2, 3, 4, 5, 7])
     circularBuffer.insert(8, at: 3)
-    XCTAssertEqual(circularBuffer.capacity, 8)
+    XCTAssertEqual(circularBuffer.capacity, 10)
     XCTAssertEqual(circularBuffer, [6, 1, 2, 8, 3, 4, 5, 7])
   }
 
@@ -463,10 +463,10 @@ final class SENNNN_CircularBufferTests: XCTestCase {
     XCTAssertEqual(circularBuffer.capacity, 7)
     XCTAssertEqual(circularBuffer, [6, 7, 1, 2, 3, 4, 5])
     circularBuffer.insert(contentsOf: [7, 8], at: 7)
-    XCTAssertEqual(circularBuffer.capacity, 9)
+    XCTAssertEqual(circularBuffer.capacity, 10)
     XCTAssertEqual(circularBuffer, [6, 7, 1, 2, 3, 4, 5, 7, 8])
     circularBuffer.insert(contentsOf: [8, 9], at: 3)
-    XCTAssertEqual(circularBuffer.capacity, 11)
+    XCTAssertEqual(circularBuffer.capacity, 15)
     XCTAssertEqual(circularBuffer, [6, 7, 1, 8, 9, 2, 3, 4, 5, 7, 8])
   }
 

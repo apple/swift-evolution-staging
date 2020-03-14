@@ -889,7 +889,7 @@ extension CircularBufferBuffer {
       let leftCount = capacity - _elementsCount
       let additionalCapacityCount = elementsInsertCount - leftCount
       if additionalCapacityCount > 0 {
-        resize(newCapacity: capacity + additionalCapacityCount)
+        resize(newCapacity: grow(minCapacity: capacity + additionalCapacityCount))
       } else {
         rotateBuffer()
       }
@@ -983,7 +983,7 @@ extension CircularBufferBuffer {
 
   @inline(__always)
   func reserveCapacity(_ n: Int) {
-    self.resize(newCapacity: capacity + n)
+    self.resize(newCapacity: grow(minCapacity: capacity + n))
   }
 
   @inline(__always)
@@ -991,7 +991,7 @@ extension CircularBufferBuffer {
     if capacity - _elementsCount > 0 {
       pushBack(newElement)
     } else {
-      resize(newCapacity: capacity + 1)
+      resize(newCapacity: grow(minCapacity: capacity + 1))
       pushBack(newElement)
     }
   }
@@ -1002,7 +1002,7 @@ extension CircularBufferBuffer {
     let leftCount = capacity - _elementsCount
     if leftCount < newElementsCount {
       let additionalCapacityRequired = newElementsCount - leftCount
-      self.resize(newCapacity: capacity + additionalCapacityRequired)
+      self.resize(newCapacity: grow(minCapacity: capacity + additionalCapacityRequired))
     }
 
     for newElement in newElements {
@@ -1116,6 +1116,12 @@ private extension CircularBufferBuffer {
     }
 
     return index-1
+  }
+
+  @inline(__always)
+  func grow(minCapacity: Int) -> Int {
+    let newCapacity = self.capacity + self.capacity >> 1
+    return Swift.max(minCapacity, newCapacity)
   }
 
   func reverseBuffer(from: Int, to: Int) {
