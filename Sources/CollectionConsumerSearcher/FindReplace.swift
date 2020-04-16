@@ -55,8 +55,20 @@ extension Collection where Element: Equatable {
 }
 
 extension BidirectionalCollection where Element: Equatable {
+  public func firstRange<S: BidirectionalCollection>(_ seq: S) -> Range<Index>? where S.Element == Element {
+    return self.firstRange(_ZAlgorithmSearcher(seq))
+  }
+  
+  public func allRanges<S: BidirectionalCollection>(_ seq: S, includeOverlaps: Bool = true) -> [Range<Index>]
+    where S.Element == Element
+  {
+    return self.allRanges(_ZAlgorithmSearcher(seq), includeOverlaps: includeOverlaps)
+  }
+
   public func lastRange<S: BidirectionalCollection>(_ seq: S) -> Range<Index>? where S.Element == Element {
-    return self.lastRange(_SearcherSequence(seq))
+    self.reversed()
+      .firstRange(_ZAlgorithmSearcher(seq.reversed()))
+      .map { range in range.upperBound.base ..< range.lowerBound.base }
   }
 }
 
