@@ -1,14 +1,24 @@
 public protocol CollectionConsumer {
   associatedtype C: Collection
 
-  func consume(_: C, from: C.Index) -> C.Index?
+  /// Returns the end of a match at the beginning of `c[s...]`, if one exists.
+  ///
+  /// If this consumer matches, this returns an index `e` such that
+  /// `c[s..<e]` is the matched subsequence of `collection`.
+  func consume(_: C, from s: C.Index) -> C.Index?
 }
 
 extension CollectionConsumer {
+  /// Returns the end of a match at the beginning of `c`, if one exists.
+  ///
+  /// If the consumer matches, this returns an index `i` such that `c[..<i]`
+  /// is the matched subsequence.
   public func consume(_ c: C) -> C.Index? {
     self.consume(c, from: c.startIndex)
   }
 
+  /// Returns the end of a match at the beginning of `c`, or `c.startIndex`
+  /// if no match is found.
   internal func _clampedConsume(_ c: C) -> C.Index {
     return consume(c) ?? c.startIndex
   }
@@ -24,15 +34,24 @@ extension CollectionConsumer {
 
 public protocol BidirectionalCollectionConsumer: CollectionConsumer
 where C: BidirectionalCollection {
-  // Return value is 1-past-the-end
-  func consumeBack(_: C, endingAt: C.Index) -> C.Index?
+  /// Returns the start of a match ending at `e`, if one exists.
+  ///
+  /// If the consumer matches, this returns an index `s` such that
+  /// `collection[s..<e]` is the matched subsequence.
+  func consumeBack(_: C, endingAt e: C.Index) -> C.Index?
 }
 
 extension BidirectionalCollectionConsumer {
+  /// Returns the start of a match at the end of `c`, if one exists.
+  ///
+  /// If the consumer matches, this returns an index `i` such that
+  /// `c[i...]` is the matched subsequence.
   public func consumeBack(_ c: C) -> C.Index? {
     return self.consumeBack(c, endingAt: c.endIndex)
   }
 
+  /// Returns the start of a match at the end of `c`, or `c.endIndex`
+  /// if no match is found.
   internal func _clampedConsumeBack(
     _ c: C
   ) -> C.Index {
