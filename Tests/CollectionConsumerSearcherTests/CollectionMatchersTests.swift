@@ -216,5 +216,94 @@ final class CollectionMatchersTests: XCTestCase {
 
   }
 
+  func test_findString() {
+    let specificText = "AAAGCATCGCAGAGAGTATACAGTACGAAAA"
+    let si = specificText.startIndex
+    expectEqual(5, specificText.allRanges("AA").count)
+    expectEqual(3, specificText.allRanges("AA", includeOverlaps: false).count)
+    expectEqual(specificText.index(si, offsetBy: 9)..<specificText.index(si, offsetBy: 12), specificText.firstRange("CAG"))
+    expectEqual(specificText.index(si, offsetBy: 20)..<specificText.index(si, offsetBy: 23), specificText.lastRange("CAG"))
+    expectEqual(nil, specificText.firstRange(""))
+
+    let letters = Array("ACTG")
+    let text = String((0..<90).map { _ in letters.randomElement()! })
+    
+    for length in 1...text.count {
+      for i in text.indices.dropLast(length) {
+        let needle = String(text[i...].prefix(length))
+
+        if let first = text.firstRange(needle) {
+          expectEqualSequence(needle, text[first])
+          guard let last = text.lastRange(needle) else {
+            expectationFailure("Didn't find last '\(String(needle))' in \(text)")
+            continue
+          }
+          expectEqualSequence(needle, text[last])
+          
+          let all = text.allRanges(needle)
+          expectTrue(all.allSatisfy { text[$0] == needle })
+          expectTrue(all.count >= (first == last ? 1 : 2))
+
+          let nonOverlapping = text.allRanges(needle, includeOverlaps: false)
+          expectTrue(nonOverlapping.allSatisfy { text[$0] == needle })
+          expectTrue(nonOverlapping.count > 0)
+          expectTrue(nonOverlapping.count <= all.count)
+        } else {
+          expectationFailure("Didn't find '\(String(needle))' in \(text)")
+        }
+
+        if let _ = text.firstRange(needle + "-") {
+          expectationFailure("Incorrectly found '\(needle)-'")
+        }
+        if let _ = text.firstRange("-" + needle) {
+          expectationFailure("Incorrectly found '-\(needle)'")
+        }
+      }
+    }
+  }
+  
+  func test_findOther() {
+    let text = Array("AAAGCATCGCAGAGAGTATACAGTACGAAAA")
+    expectEqual([0..<2, 1..<3, 27..<29, 28..<30, 29..<31], text.allRanges("AA"))
+    expectEqual([0..<2, 27..<29, 29..<31], text.allRanges("AA", includeOverlaps: false))
+    expectEqual(9..<12, text.firstRange("CAG"))
+    expectEqual(20..<23, text.lastRange("CAG"))
+    expectEqual(nil, text.firstRange(""))
+
+    var foundCount = 0
+    for length in 1...text.count {
+      for i in text.indices.dropLast(length) {
+        let needle = text[i...].prefix(length)
+
+        if let first = text.firstRange(needle) {
+          expectEqual(needle, text[first])
+          let last = text.lastRange(needle)!
+          expectEqual(needle, text[last])
+          
+          let all = text.allRanges(needle)
+          expectTrue(all.allSatisfy { text[$0] == needle })
+          expectTrue(all.count >= (first == last ? 1 : 2))
+          foundCount += all.count
+
+          let nonOverlapping = text.allRanges(needle, includeOverlaps: false)
+          expectTrue(nonOverlapping.allSatisfy { text[$0] == needle })
+          expectTrue(nonOverlapping.count > 0)
+          expectTrue(nonOverlapping.count <= all.count)
+          foundCount += nonOverlapping.count
+        } else {
+          expectationFailure("Didn't find '\(String(needle))'")
+        }
+        
+        if let _ = text.firstRange(needle + "-") {
+          expectationFailure("Incorrectly found '\(needle)-'")
+        }
+        if let _ = text.firstRange("-" + needle) {
+          expectationFailure("Incorrectly found '-\(needle)'")
+        }
+      }
+    }
+    expectEqual(1626, foundCount)
+  }
+
 }
 
