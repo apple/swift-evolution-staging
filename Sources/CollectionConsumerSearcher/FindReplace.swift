@@ -7,11 +7,24 @@ extension Collection {
   public func firstRange<CS: CollectionSearcher>(_ cs: CS) -> Range<Index>? where CS.C == Self {
     return cs.searchFirst(self)
   }
+
   public func first<CS: CollectionSearcher>(_ cs: CS) -> SubSequence? where CS.C == Self {
     guard let range = self.firstRange(cs) else { return nil }
     return self[range]
   }
 
+  public func allRanges<CS: CollectionSearcher>(_ cs: CS, includeOverlaps: Bool = true) -> [Range<Index>]
+    where CS.C == Self
+  {
+    var start = startIndex
+    var state = cs.preprocess(self)
+    var result: [Range<Index>] = []
+    while let range = cs.search(self, from: start, &state) {
+      result.append(range)
+      start = includeOverlaps ? index(after: range.lowerBound) : range.upperBound
+    }
+    return result
+  }
 }
 
 extension BidirectionalCollection {
@@ -32,6 +45,12 @@ extension BidirectionalCollection {
 extension Collection where Element: Equatable {
   public func firstRange<S: Sequence>(_ seq: S) -> Range<Index>? where S.Element == Element {
     return self.firstRange(_SearcherSequence(seq))
+  }
+  
+  public func allRanges<S: Sequence>(_ seq: S, includeOverlaps: Bool = true) -> [Range<Index>]
+    where S.Element == Element
+  {
+    return self.allRanges(_SearcherSequence(seq), includeOverlaps: includeOverlaps)
   }
 }
 
