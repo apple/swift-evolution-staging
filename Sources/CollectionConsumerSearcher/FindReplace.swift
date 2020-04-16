@@ -72,6 +72,22 @@ extension BidirectionalCollection where Element: Equatable {
   }
 }
 
+extension String {
+  public func firstRange(_ substring: String) -> Range<Index>? {
+    return self.firstRange(_TwoWayAlgorithmSearcher(substring))
+  }
+  
+  public func allRanges(_ substring: String, includeOverlaps: Bool = true) -> [Range<Index>] {
+    return self.allRanges(_TwoWayAlgorithmSearcher(substring), includeOverlaps: includeOverlaps)
+  }
+
+  public func lastRange(_ substring: String) -> Range<Index>? {
+    guard let range = self.reversed().firstRange(_TwoWayAlgorithmSearcher(substring.reversed()))
+      else { return nil }
+    return range.upperBound.base ..< range.lowerBound.base
+  }
+}
+
 //
 // MARK: Replace
 //
