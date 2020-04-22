@@ -34,3 +34,5 @@ p(str)
 // str == "12.0,5.0,1.0\n10.0,-1.0"
 
 
+
+print("abaaaba".allRangesZArray("ab"))

@@ -89,6 +89,46 @@ extension String {
 }
 
 //
+// MARK: `tester` command helpers
+//
+
+extension BidirectionalCollection where Element: Comparable {
+  public func allRangesNaive<C: BidirectionalCollection>(
+    _ subsequence: C,
+    includeOverlaps: Bool = true
+  ) -> [Range<Index>]
+    where C.Element == Element
+  {
+    let _self = StatsCollectingCollection(self)
+    let _sub = StatsCollectingCollection(subsequence)
+    return _self.allRanges(_SearcherSequence(_sub), includeOverlaps: includeOverlaps)
+  }
+
+  public func allRangesTwoWay<C: BidirectionalCollection>(
+    _ subsequence: C,
+    includeOverlaps: Bool = true
+  ) -> [Range<Index>]
+    where C.Element == Element
+  {
+    let _self = StatsCollectingCollection(self)
+    let _sub = StatsCollectingCollection(subsequence)
+    return _self.allRanges(_TwoWayAlgorithmSearcher(_sub), includeOverlaps: includeOverlaps)
+  }
+
+  public func allRangesZArray<C: BidirectionalCollection>(
+    _ subsequence: C,
+    includeOverlaps: Bool = true
+  ) -> [Range<Index>]
+    where C.Element == Element
+  {
+    let _self = StatsCollectingCollection(Array(self))
+    let _sub = StatsCollectingCollection(Array(subsequence))
+    return _self.allRanges(_ZAlgorithmSearcher(_sub), includeOverlaps: includeOverlaps)
+        .map { index(startIndex, offsetBy: $0.lowerBound) ..< index(startIndex, offsetBy: $0.upperBound) }
+  }
+}
+
+//
 // MARK: Replace
 //
 
