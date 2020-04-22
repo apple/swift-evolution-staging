@@ -149,11 +149,11 @@ struct RepeatMatch<M0: StdlibPattern> : StdlibPattern {
   searchLoop:
     while !rest.isEmpty {
       switch singlePattern.matched(atStartOf: rest) {
-      case .found(let x):
-        data.append(x)
-        lastEnd = x.end
+      case .found(let end, let foundData):
+        data.append((end, foundData))
+        lastEnd = end
         if data.count == repeatLimits.upperBound { break }
-        rest = rest[x.end..<rest.endIndex]
+        rest = rest[end..<rest.endIndex]
       case .notFound(let r):
         if !repeatLimits.contains(data.count)  {
           return .notFound(resumeAt: r)

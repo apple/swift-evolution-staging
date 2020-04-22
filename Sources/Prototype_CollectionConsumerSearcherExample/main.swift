@@ -1,3 +1,4 @@
+import CollectionConsumerSearcher
 import Prototype_CollectionConsumerSearcher
 
 import Foundation
@@ -32,5 +33,3 @@ p(str.matches(number).joined(separator: " "))
 str.replaceAll(number) { "\(Double($0)!.rounded())" }
 p(str)
 // str == "12.0,5.0,1.0\n10.0,-1.0"
-
-
