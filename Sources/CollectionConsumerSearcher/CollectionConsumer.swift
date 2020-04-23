@@ -95,7 +95,7 @@ internal struct _ConsumerSequence<
   internal func consume(_ c: C, from: C.Index) -> C.Index? {
     var idx = from
     for e in self.seq {
-      guard e == c[idx] else { return nil }
+      guard idx < c.endIndex, e == c[idx] else { return nil }
       c.formIndex(after: &idx)
     }
     return idx
