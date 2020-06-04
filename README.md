@@ -4,7 +4,7 @@
   inclusion in the Swift standard library, and is not intended for use in
   production code at this time.
 
-* Proposal: [SE-NNNN](https://github.com/apple/swift-evolution/blob/96b7533ec0fc198bac8f8cf3e5eae7102d3205d2/proposals/NNNN-adjacentpairs.md)
+* Proposal: [SE-NNNN](https://github.com/apple/swift-evolution/blob/4c17c89f9caa4db77bbe6424bfc31ddf353c77a2/proposals/NNNN-adjacentpairs.md)
 * Author: [Michael Pangburn](https://github.com/mpangburn)
 
 
