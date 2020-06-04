@@ -76,5 +76,19 @@ final class SENNNN_AdjacentPairsTests: XCTestCase {
             XCTAssertEqual(pairs.distance(from: pairs.endIndex, to: pairs.startIndex), -pairs.count)
         }
     }
+
+    func testIndexOffsetBy() {
+        let pairSequences = (0...4).map { (0..<$0).adjacentPairs() }
+
+        for pairs in pairSequences {
+            for index in pairs.indices.dropLast() {
+                let next = pairs.index(after: index)
+                XCTAssertEqual(pairs.index(index, offsetBy: 1), next)
+            }
+
+            XCTAssertEqual(pairs.index(pairs.startIndex, offsetBy: pairs.count), pairs.endIndex)
+            XCTAssertEqual(pairs.index(pairs.endIndex, offsetBy: -pairs.count), pairs.startIndex)
+        }
+    }
 }
 

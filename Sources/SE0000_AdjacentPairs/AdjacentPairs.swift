@@ -131,7 +131,18 @@ extension AdjacentPairs: Collection where Base: Collection {
     }
 
     public func index(_ i: Index, offsetBy distance: Int) -> Index {
-        Index(_base: _base.index(i._base, offsetBy: distance))
+        if distance == 0 {
+            return i
+        } else if distance > 0 {
+            let offsetIndex = _base.index(i._base, offsetBy: distance)
+            return _base.index(after: offsetIndex) == _base.endIndex
+                ? endIndex
+                : Index(_base: offsetIndex)
+        } else {
+            return i == endIndex
+                ? Index(_base: _base.index(i._base, offsetBy: distance - 1))
+                : Index(_base: _base.index(i._base, offsetBy: distance))
+        }
     }
 
     public func distance(from start: Index, to end: Index) -> Int {
