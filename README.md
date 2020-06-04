@@ -1,51 +1,26 @@
-# Swift Evolution Staging
-
-This repository is the starting point for Swift Evolution proposal
-implementations. See the [Swift Evolution Process][se-process] to learn about
-how ideas are pitched, refined, and then proposed for inclusion in the Swift
-standard library.
-
-[se-process]: https://github.com/apple/swift-evolution/blob/master/process.md
-
-Complete this checklist when preparing your implementation:
-  
-- In `Package.swift` and in the _Introduction_ section below, rename your module
-  to use a short, camel-cased name of your proposed feature (ex: `SE0000_MyFeature`).
-  
-- Rename the folders and files in the `Sources` and `Tests` directories to match
-  your new module name.
-  
-- Implement your proposed feature in the `Sources` directory, and add tests in
-  the `Tests` directory.
-  
-- Make sure the Swift project code header is at the beginning of every source
-  file.
-  
-- Finish editing the section below, and then remove this checklist and
-  everything else above the line. That's it!
-
---------------------------------------------------------------------------------
-
-# Package Name
+# SE0000_AdjacentPairs
 
 > **Note:** This package is a part of a Swift Evolution proposal for
   inclusion in the Swift standard library, and is not intended for use in
   production code at this time.
 
-* Proposal: [SE-NNNN](https://github.com/apple/swift-evolution/proposals/NNNN-filename.md)
-* Author(s): [Author 1](https://github.com/author1), [Author 2](https://github.com/author1)
+* Proposal: [SE-NNNN](https://github.com/apple/swift-evolution/blob/96b7533ec0fc198bac8f8cf3e5eae7102d3205d2/proposals/NNNN-adjacentpairs.md)
+* Author: [Michael Pangburn](https://github.com/mpangburn)
 
 
 ## Introduction
 
-A short description of the proposed library. 
-Provide examples and describe how they work.
+**SE0000_AdjacentPairs** provides a method `adjacentPairs`, available to all types conforming to Sequence,
+as well as the supporting `AdjacentPairs` type.
+
+The `AdjacentPairs` wrapper sequence returned by `adjacentPairs` lazily iterates over tuples of adjacent elements: 
 
 ```swift
-import SE0000_PackageName
+import SE0000_AdjacentPairs
 
-print(Placeholder.message)
-// Prints("Hello, world!")
+let numbers = (1...5)
+let pairs = numbers.adjacentPairs()
+// Array(pairs) == [(1, 2), (2, 3), (3, 4), (4, 5)]
 ```
 
 
@@ -57,7 +32,7 @@ add the following to your `Package.swift` file's dependencies:
 ```swift
 .package(
     url: "https://github.com/apple/swift-evolution-staging.git",
-    .branch("SE0000_PackageName")),
+    .branch("SE0000_AdjacentPairs")),
 ```
 
 
