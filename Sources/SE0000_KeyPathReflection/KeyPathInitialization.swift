@@ -90,7 +90,7 @@ func instantiateKeyPathBuffer(
   let header = KeyPathBufferHeader(
     hasReferencePrefix: false,
     isTrivial: true,
-    size: MemoryLayout<UInt32>.size
+    size: UInt32(MemoryLayout<UInt32>.size)
   )
   
   data.storeBytes(of: header, as: KeyPathBufferHeader.self)
