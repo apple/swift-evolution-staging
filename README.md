@@ -1,53 +1,43 @@
-# Swift Evolution Staging
-
-This repository is the starting point for Swift Evolution proposal
-implementations. See the [Swift Evolution Process][se-process] to learn about
-how ideas are pitched, refined, and then proposed for inclusion in the Swift
-standard library.
-
-[se-process]: https://github.com/apple/swift-evolution/blob/master/process.md
-
-Complete this checklist when preparing your implementation:
-  
-- In `Package.swift` and in the _Introduction_ section below, rename your module
-  to use a short, camel-cased name of your proposed feature (ex: `SE0000_MyFeature`).
-  
-- Rename the folders and files in the `Sources` and `Tests` directories to match
-  your new module name.
-  
-- Implement your proposed feature in the `Sources` directory, and add tests in
-  the `Tests` directory.
-  
-- Make sure the Swift project code header is at the beginning of every source
-  file.
-  
-- Finish editing the section below, and then remove this checklist and
-  everything else above the line. That's it!
-
---------------------------------------------------------------------------------
-
-# Package Name
+# KeyPath Reflection
 
 > **Note:** This package is a part of a Swift Evolution proposal for
   inclusion in the Swift standard library, and is not intended for use in
   production code at this time.
 
 * Proposal: [SE-NNNN](https://github.com/apple/swift-evolution/proposals/NNNN-filename.md)
-* Author(s): [Author 1](https://github.com/author1), [Author 2](https://github.com/author1)
+* Authors: [Richard Wei](https://github.com/rxwei), [Dan Zheng](https://github.com/dan-zheng), [Alejandro Alonso](https://github.com/Azoy)
 
 
 ## Introduction
 
-A short description of the proposed library. 
-Provide examples and describe how they work.
+This proposal aims to provide a mechanism for users to get key paths to stored properties
+of types at runtime.
 
 ```swift
-import SE0000_PackageName
+struct Dog {
+  let age: Int
+  let name: String
+}
 
-print(Placeholder.message)
-// Prints("Hello, world!")
+let dogKeyPaths = Reflection.allKeysPaths(for: Dog.self)
+
+let sparky = Dog(age: 128, name: "Sparky")
+
+for dogKeyPath in dogKeyPaths {
+  print(sparky[keyPath: dogKeyPath]) // 128, Sparky
+}
 ```
 
+Of course, this also works with instances at runtime:
+
+```swift
+let nums = [1, 2, 3, 4]
+let numKeyPaths = Reflection.allKeyPaths(for: nums)
+
+for numKeyPath in numKeyPaths {
+  print(nums[keyPath: numKeyPath]) // 1, 2, 3, 4
+}
+```
 
 ## Usage
 
@@ -57,7 +47,8 @@ add the following to your `Package.swift` file's dependencies:
 ```swift
 .package(
     url: "https://github.com/apple/swift-evolution-staging.git",
-    .branch("SE0000_PackageName")),
+    .branch("SE0000_KeyPathReflection")
+)
 ```
 
 

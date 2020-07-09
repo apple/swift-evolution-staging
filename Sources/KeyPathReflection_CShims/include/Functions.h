@@ -2,7 +2,7 @@
 //
 // This source file is part of the Swift.org open source project
 //
-// Copyright (c) 2019 Apple Inc. and the Swift project authors
+// Copyright (c) 2020 Apple Inc. and the Swift project authors
 // Licensed under Apache License v2.0 with Runtime Library Exception
 //
 // See https://swift.org/LICENSE.txt for license information
@@ -10,11 +10,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-import XCTest
-import SE0000_PackageName
+#ifndef KEYPATH_REFLECTION_FUNCTIONS
+#define KEYPATH_REFLECTION_FUNCTIONS
 
-final class SENNNN_PackageNameTests: XCTestCase {
-  func testPlaceholder() {
-    XCTAssertEqual(Placeholder.message, "Hello, world!")
-  }
-}
+#include <stddef.h>
+
+// Used to allocate keypaths at runtime.
+
+// HeapObject *swift_allocObject(Metadata *type, size_t size, size_t alignMask);
+extern void *swift_allocObject(void *type, size_t size, size_t alignMask);
+
+#endif
