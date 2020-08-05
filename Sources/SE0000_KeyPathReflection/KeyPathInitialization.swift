@@ -141,7 +141,7 @@ internal func createKeyPath(root: TypeMetadata, leaf: Int) -> AnyKeyPath {
     instantiateKeyPathBuffer(root, leaf, $0)
   }
   
-  let heapObj = UnsafeRawPointer(Unmanaged.passRetained(instance).toOpaque())
+  let heapObj = UnsafeRawPointer(Unmanaged.passUnretained(instance).toOpaque())
   let keyPath = unsafeBitCast(heapObj, to: AnyKeyPath.self)
   return keyPath
 }
