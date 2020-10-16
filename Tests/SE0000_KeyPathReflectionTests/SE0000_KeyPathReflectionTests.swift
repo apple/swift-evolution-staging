@@ -87,6 +87,18 @@ enum CustomKeyPaths {
     */
   }
 
+  static func testOptional() throws {
+    let x: Int? = nil
+    XCTAssertTrue(Reflection.allKeyPaths(for: x).isEmpty)
+    var y: Int? = 3
+    let yKeyPaths = Reflection.allKeyPaths(for: y)
+    XCTAssertEqual(yKeyPaths, [\Optional.!])
+    let concreteYKeyPath = try XCTUnwrap(yKeyPaths[0] as? WritableKeyPath<Int?, Int>)
+    XCTAssertEqual(y[keyPath: concreteYKeyPath], 3)
+    y[keyPath: concreteYKeyPath] = 4
+    XCTAssertEqual(y, 4)
+  }
+
   static func testArray() throws {
     let array = [0, 1, 2, 3]
     let allKeyPaths = Reflection.allKeyPaths(for: array)
@@ -112,6 +124,7 @@ final class SE0000_KeyPathReflectionTests: XCTestCase {
   }
 
   func testCustomKeyPaths() throws {
+    try CustomKeyPaths.testOptional()
     try CustomKeyPaths.testStruct()
     try CustomKeyPaths.testClass()
     try CustomKeyPaths.testArray()
