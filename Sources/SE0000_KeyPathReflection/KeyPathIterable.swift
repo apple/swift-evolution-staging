@@ -50,6 +50,12 @@ internal func areWritable<Root, Value>(
   }
 }
 
+extension Optional: KeyPathIterable {
+  public var allNamedKeyPaths: [(name: String, keyPath: PartialKeyPath<Optional>)] {
+    self == nil ? [] : [("value", \Optional.!)]
+  }
+}
+
 extension Array: KeyPathIterable {
   public var allNamedKeyPaths: [(name: String, keyPath: PartialKeyPath<Array>)] {
     let result = indices.map { i in (i.description, \Array[i]) }
