@@ -115,13 +115,12 @@ func getKeyPathType(
   
   func openRoot<Root>(_: Root.Type) -> AnyKeyPath.Type {
     func openLeaf<Value>(_: Value.Type) -> AnyKeyPath.Type {
-      switch root.kind {
-      case .struct:
-        return leaf.flags.isVar ? WritableKeyPath<Root, Value>.self
-                                : KeyPath<Root, Value>.self
-      case .class:
-        return ReferenceWritableKeyPath<Root, Value>.self
+      if leaf.flags.isVar {
+        return root.kind == .class
+          ? ReferenceWritableKeyPath<Root, Value>.self
+          : WritableKeyPath<Root, Value>.self
       }
+      return KeyPath<Root, Value>.self
     }
     
     return _openExistential(leafType, do: openLeaf)

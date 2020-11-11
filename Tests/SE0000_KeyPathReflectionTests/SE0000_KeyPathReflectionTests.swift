@@ -4,9 +4,11 @@ import XCTest
 private protocol Protocol {}
 extension Int: Protocol {}
 
-private class Class {
+private final class FinalClass {
+  let float: Float = 0
   var int: Int = 0
-  weak var cls: Class? = nil
+  // FIXME: Weak and unowned fields are not supported.
+  // weak var cls: Class? = nil
 }
 
 private struct Struct<T: Equatable> {
@@ -44,16 +46,15 @@ enum StoredPropertyKeyPaths {
   }
 
   static func testClass() throws {
-    // FIXME: Class property iteration fails.
-    /*
-    let allKeyPaths = Reflection.allStoredPropertyKeyPaths(for: Class.self)
-    XCTAssertEqual(allKeyPaths, [\Class.int, \Class.cls])
+    let allKeyPaths = Reflection.allKeyPaths(for: FinalClass.self)
+    XCTAssertEqual(allKeyPaths, [\FinalClass.float, \FinalClass.int])
 
-    let allNamedKeyPaths = Reflection.allNamedStoredPropertyKeyPaths(
-      for: Class.self)
+    let allNamedKeyPaths = Reflection.allNamedKeyPaths(
+      for: FinalClass.self)
     assertNamedKeyPathsEqual(
-      allNamedKeyPaths, [("int", \Class.int), ("cls", \Class.cls)])
-    */
+      allNamedKeyPaths, [("float", \FinalClass.float), ("int", \FinalClass.int)])
+
+    // FIXME: Handle and test non-final class properties and weak/unowned properties.
   }
 }
 
@@ -75,16 +76,15 @@ enum CustomKeyPaths {
   }
 
   static func testClass() throws {
-    // FIXME: Class property iteration fails.
-    /*
-    let c = Class()
+    let c = FinalClass()
     let allKeyPaths = Reflection.allKeyPaths(for: c)
-    XCTAssertEqual(allKeyPaths, [\Class.int, \Class.cls])
+    XCTAssertEqual(allKeyPaths, [\FinalClass.float, \FinalClass.int])
 
     let allNamedKeyPaths = Reflection.allNamedKeyPaths(for: c)
     assertNamedKeyPathsEqual(
-      allNamedKeyPaths, [("int", \Class.int), ("cls", \Class.cls)])
-    */
+      allNamedKeyPaths, [("float", \FinalClass.float), ("int", \FinalClass.int)])
+
+    // FIXME: Handle and test non-final class properties and weak/unowned properties.
   }
 
   static func testOptional() throws {
