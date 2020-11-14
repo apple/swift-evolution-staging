@@ -23,13 +23,13 @@ let package = Package(
   dependencies: [
   ],
   targets: [
-    .target(
-      name: "KeyPathReflection_CShims",
-      dependencies: []
-    ),
+    .target(name: "KeyPathReflection_CShims"),
     .target(
       name: "SE0000_KeyPathReflection",
-      dependencies: ["KeyPathReflection_CShims"]
+      dependencies: ["KeyPathReflection_CShims"],
+      swiftSettings: [
+        .unsafeFlags(["-parse-stdlib"])
+      ]
     ),
     .testTarget(
       name: "SE0000_KeyPathReflectionTests",

@@ -10,6 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Swift
+
 //===----------------------------------------------------------------------===//
 // Metadata Structures
 //===----------------------------------------------------------------------===//
@@ -297,12 +299,12 @@ extension TypeContextDescriptor {
   var _typeDescriptor: _TypeContextDescriptor {
     pointer.load(as: _TypeContextDescriptor.self)
   }
-  
+
   // The field descriptor that describes the stored representation of this type.
   var fields: FieldDescriptor {
     let offset = pointer.advanced(by: MemoryLayout<Int32>.size * 4)
     let address = UnsafeRawPointer(_typeDescriptor._fields.address(from: offset))
-    return FieldDescriptor(pointer: address)
+    return FieldDescriptor(signedPointer: address)
   }
   
   // Certain flags specific to types in Swift, such as whether or not a class
@@ -339,11 +341,11 @@ internal struct TypeContextDescriptorFlags {
 // Struct Descriptor
 
 // A struct descriptor that describes some structure context.
-internal struct StructDescriptor: TypeContextDescriptor, LayoutWrapper {
+internal struct StructDescriptor: TypeContextDescriptor, PointerAuthenticatedLayoutWrapper {
   typealias Layout = _StructDescriptor
   
   // The backing context descriptor pointer.
-  let pointer: UnsafeRawPointer
+  let signedPointer: UnsafeRawPointer
   
   // The offset to the field offset vector found in the metadata.
   var fieldOffsetVectorOffset: Int {
@@ -365,11 +367,11 @@ internal struct _StructDescriptor {
 // Class Descriptor
 
 // A class descriptor that descibes some class context.
-internal struct ClassDescriptor: TypeContextDescriptor, LayoutWrapper {
+internal struct ClassDescriptor: TypeContextDescriptor, PointerAuthenticatedLayoutWrapper {
   typealias Layout = _ClassDescriptor
   
   // The backing context descriptor pointer.
-  let pointer: UnsafeRawPointer
+  let signedPointer: UnsafeRawPointer
   
   // The offset to the field offset vector found in the metadata.
   var fieldOffsetVectorOffset: Int {
@@ -424,11 +426,11 @@ internal struct _StoredClassMetadataBounds {
 // Field Descriptor
 
 // A special descriptor that describes a type's fields.
-internal struct FieldDescriptor: LayoutWrapper {
+internal struct FieldDescriptor: PointerAuthenticatedLayoutWrapper {
   typealias Layout = _FieldDescriptor
   
   // The backing field descriptor pointer.
-  let pointer: UnsafeRawPointer
+  let signedPointer: UnsafeRawPointer
   
   // The number of fields this type has. This could mean different things
   // depending on what kind of type this is found under. For example, this is
@@ -446,7 +448,7 @@ internal struct FieldDescriptor: LayoutWrapper {
     
     for i in 0 ..< numFields {
       let address = trailing + MemoryLayout<_FieldRecord>.size * i
-      result.append(FieldRecord(pointer: address))
+      result.append(FieldRecord(signedPointer: address))
     }
     
     return result
@@ -454,11 +456,11 @@ internal struct FieldDescriptor: LayoutWrapper {
 }
 
 // A record that describes a single stored property or an enum case.
-internal struct FieldRecord: LayoutWrapper {
+internal struct FieldRecord: PointerAuthenticatedLayoutWrapper {
   typealias Layout = _FieldRecord
   
   // The backing field record pointer.
-  let pointer: UnsafeRawPointer
+  let signedPointer: UnsafeRawPointer
   
   // The flags that describe this field record.
   var flags: FieldRecordFlags {
@@ -507,8 +509,17 @@ internal struct FieldRecordFlags {
 
 internal protocol LayoutWrapper {
   associatedtype Layout
-  
   var pointer: UnsafeRawPointer { get }
+}
+
+internal protocol PointerAuthenticatedLayoutWrapper: LayoutWrapper {
+  var signedPointer: UnsafeRawPointer { get }
+}
+
+extension PointerAuthenticatedLayoutWrapper {
+  var pointer: UnsafeRawPointer {
+    signedPointer.strippingSignatureAsProcessIndependentData()
+  }
 }
 
 extension LayoutWrapper {
@@ -541,7 +552,7 @@ func getSymbolicMangledNameLength(_ base: UnsafeRawPointer) -> Int {
   while let current = Optional(end.load(as: UInt8.self)), current != 0 {
     // Skip the current character
     end = end + 1
-    
+
     // Skip over a symbolic reference
     if current >= 0x1 && current <= 0x17 {
       end += 4

@@ -10,6 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Swift
 import KeyPathReflection_CShims
 
 // This is a utility within KeyPath.swift in the standard library. If this
@@ -39,14 +40,14 @@ extension AnyKeyPath {
       size,
       alignment
     )
-    
+
     guard object != nil else {
       fatalError("Allocating \(self) instance failed for keypath reflection")
     }
-    
+
     // This memory layout of Int by 2 is the size of a heap object which object
     // points to. Tail members appear immediately afterwards.
-    let base = object! + MemoryLayout<Int>.size * 2
+    let base = unsafeBitCast(object, to: UnsafeMutableRawPointer.self) + MemoryLayout<Int>.size * 2
     
     // The first word is the kvc string pointer. Set it to 0 (nil).
     base.storeBytes(of: 0, as: Int.self)
@@ -112,7 +113,7 @@ func getKeyPathType(
   for leaf: FieldRecord
 ) -> AnyKeyPath.Type {
   let leafType = root.type(of: leaf.mangledTypeName)!
-  
+
   func openRoot<Root>(_: Root.Type) -> AnyKeyPath.Type {
     func openLeaf<Value>(_: Value.Type) -> AnyKeyPath.Type {
       if leaf.flags.isVar {
@@ -122,10 +123,8 @@ func getKeyPathType(
       }
       return KeyPath<Root, Value>.self
     }
-    
     return _openExistential(leafType, do: openLeaf)
   }
-  
   return _openExistential(root.type, do: openRoot)
 }
 
@@ -133,7 +132,7 @@ func getKeyPathType(
 // runtime.
 internal func createKeyPath(root: TypeMetadata, leaf: Int) -> AnyKeyPath {
   let field = root.contextDescriptor.fields.records[leaf]
-  
+
   let keyPathTy = getKeyPathType(from: root, for: field)
   let size = MemoryLayout<Int>.size * 3
   let instance = keyPathTy._create(capacityInBytes: size) {

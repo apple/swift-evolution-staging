@@ -10,6 +10,28 @@
 //
 //===----------------------------------------------------------------------===//
 
+// Source: swift/include/swift/Basic/RelativePointer.h
+
+import Swift
+
+extension UnsafeRawPointer {
+  /// Returns the underlying raw pointer by stripping the pointer authentication signature.
+  /// - Precondition: `self` must have been signed with the process-independent data key, i.e. ASDA.
+  /// - Returns: The underlying raw pointer.
+  func strippingSignatureAsProcessIndependentData() -> UnsafeRawPointer {
+    #if _ptrauth(_arm64e)
+    return UnsafeRawPointer(bitPattern: UInt(UInt64(Builtin.int_ptrauth_strip_Int64(
+      UInt64(UInt(bitPattern: self))._value,
+      UInt32(2)._value /* Process-independent data key, aka. ASDA */
+    )))).unsafelyUnwrapped
+    #elseif _ptrauth(_none)
+    return self
+    #else
+    #error("Unsupported ptrauth scheme")
+    #endif
+  }
+}
+
 internal protocol RelativePointer {
   associatedtype Pointee
   
@@ -21,7 +43,9 @@ internal protocol RelativePointer {
 
 extension RelativePointer {
   func address(from ptr: UnsafeRawPointer) -> UnsafePointer<Pointee> {
-    UnsafePointer<Pointee>((ptr + Int(offset))._rawValue)
+    let newPtr = UnsafeRawPointer(
+      bitPattern: UInt(bitPattern: ptr) &+ UInt(bitPattern: Int(offset)))!
+    return newPtr.assumingMemoryBound(to: Pointee.self)
   }
 }
 
