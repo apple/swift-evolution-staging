@@ -20,4 +20,8 @@
 // HeapObject *swift_allocObject(Metadata *type, size_t size, size_t alignMask);
 extern void *swift_allocObject(void *type, size_t size, size_t alignMask);
 
+#ifdef __arm64e__
+const void *__ptrauth_strip_asda(const void *ptr);
+#endif
+
 #endif

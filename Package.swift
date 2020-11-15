@@ -26,10 +26,7 @@ let package = Package(
     .target(name: "KeyPathReflection_CShims"),
     .target(
       name: "SE0000_KeyPathReflection",
-      dependencies: ["KeyPathReflection_CShims"],
-      swiftSettings: [
-        .unsafeFlags(["-parse-stdlib"])
-      ]
+      dependencies: ["KeyPathReflection_CShims"]
     ),
     .testTarget(
       name: "SE0000_KeyPathReflectionTests",

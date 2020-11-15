@@ -10,8 +10,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-import Swift
-
 public enum Reflection {
   /// Returns the collection of all key paths of this type.
   ///
