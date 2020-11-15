@@ -10,6 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Swift
+
 // An implementation detail of `KeyPathIterable`; do not use this protocol
 // directly.
 public protocol _KeyPathIterableBase {
