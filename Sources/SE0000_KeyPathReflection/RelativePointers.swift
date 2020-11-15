@@ -11,8 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 // Source: swift/include/swift/Basic/RelativePointer.h
-
-import Swift
+import KeyPathReflection_CShims
 
 extension UnsafeRawPointer {
   /// Returns the underlying raw pointer by stripping the pointer authentication signature.
@@ -20,10 +19,7 @@ extension UnsafeRawPointer {
   /// - Returns: The underlying raw pointer.
   func strippingSignatureAsProcessIndependentData() -> UnsafeRawPointer {
     #if _ptrauth(_arm64e)
-    return UnsafeRawPointer(bitPattern: UInt(UInt64(Builtin.int_ptrauth_strip_Int64(
-      UInt64(UInt(bitPattern: self))._value,
-      UInt32(2)._value /* Process-independent data key, aka. ASDA */
-    )))).unsafelyUnwrapped
+    return __ptrauth_strip_asda(self)
     #elseif _ptrauth(_none)
     return self
     #else
