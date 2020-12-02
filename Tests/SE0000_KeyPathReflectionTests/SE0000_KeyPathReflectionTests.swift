@@ -16,10 +16,13 @@ private struct Struct<T: Equatable> {
   var generic: [T]
 }
 
+extension Struct: Protocol {}
+extension FinalClass: Protocol {}
+
 /// Asserts that the given named key path collections are equal.
-func assertNamedKeyPathsEqual<Root>(
-  _ actual: [(name: String, keyPath: PartialKeyPath<Root>)],
-  _ expected: [(name: String, keyPath: PartialKeyPath<Root>)],
+func assertNamedKeyPathsEqual<KeyPath: AnyKeyPath>(
+  _ actual: [(name: String, keyPath: KeyPath)],
+  _ expected: [(name: String, keyPath: KeyPath)],
   file: StaticString = #file,
   line: UInt = #line
 ) {
@@ -52,9 +55,37 @@ enum StoredPropertyKeyPaths {
     let allNamedKeyPaths = Reflection.allNamedKeyPaths(
       for: FinalClass.self)
     assertNamedKeyPathsEqual(
-      allNamedKeyPaths, [("float", \FinalClass.float), ("int", \FinalClass.int)])
+      allNamedKeyPaths,
+      [("float", \FinalClass.float), ("int", \FinalClass.int)])
 
-    // FIXME: Handle and test non-final class properties and weak/unowned properties.
+    // FIXME: Handle and test non-final class properties and weak/unowned
+    // properties.
+  }
+
+  static func testExistential() throws {
+    func test<T>(erasingAs existentialType: T.Type) {
+      // Struct
+      XCTAssertEqual(
+        Reflection.allKeyPaths(
+          forUnderlyingTypeOf: Struct<Int>.self as! T.Type),
+        [\Struct<Int>.existential, \Struct<Int>.generic])
+      assertNamedKeyPathsEqual(
+        Reflection.allNamedKeyPaths(for: Struct<Int>.self as! T.Type),
+        [
+          ("existential", \Struct<Int>.existential),
+          ("generic", \Struct<Int>.generic)
+        ])
+      // Class
+      XCTAssertEqual(
+        Reflection.allKeyPaths(forUnderlyingTypeOf: FinalClass.self as! T.Type),
+        [\FinalClass.float, \FinalClass.int])
+      assertNamedKeyPathsEqual(
+        Reflection.allNamedKeyPaths(
+            forUnderlyingTypeOf: FinalClass.self as! T.Type),
+        [("float", \FinalClass.float), ("int", \FinalClass.int)])
+    }
+    test(erasingAs: Any.self)
+    test(erasingAs: Protocol.self)
   }
 }
 
@@ -82,9 +113,39 @@ enum CustomKeyPaths {
 
     let allNamedKeyPaths = Reflection.allNamedKeyPaths(for: c)
     assertNamedKeyPathsEqual(
-      allNamedKeyPaths, [("float", \FinalClass.float), ("int", \FinalClass.int)])
+      allNamedKeyPaths,
+      [("float", \FinalClass.float), ("int", \FinalClass.int)])
 
-    // FIXME: Handle and test non-final class properties and weak/unowned properties.
+    // FIXME: Handle and test non-final class properties and weak/unowned
+    // properties.
+  }
+
+  static func testExistential() throws {
+    let s = Struct<Int>(existential: 1, generic: [2, 3])
+    let c = FinalClass()
+    func test<T>(erasingAs existentialType: T.Type) {
+      // Struct
+      let existentialStruct = s as! T
+      XCTAssertEqual(
+        Reflection.allKeyPaths(for: existentialStruct),
+        [\Struct<Int>.existential, \Struct<Int>.generic])
+      assertNamedKeyPathsEqual(
+        Reflection.allNamedKeyPaths(for: existentialStruct),
+        [
+          ("existential", \Struct<Int>.existential),
+          ("generic", \Struct<Int>.generic)
+        ])
+      // Class
+      let existentialClass = c as! T
+      XCTAssertEqual(
+        Reflection.allKeyPaths(for: existentialClass),
+        [\FinalClass.float, \FinalClass.int])
+      assertNamedKeyPathsEqual(
+        Reflection.allNamedKeyPaths(for: existentialClass),
+        [("float", \FinalClass.float), ("int", \FinalClass.int)])
+    }
+    test(erasingAs: Any.self)
+    test(erasingAs: Protocol.self)
   }
 
   static func testOptional() throws {
@@ -93,7 +154,8 @@ enum CustomKeyPaths {
     var y: Int? = 3
     let yKeyPaths = Reflection.allKeyPaths(for: y)
     XCTAssertEqual(yKeyPaths, [\Optional.!])
-    let concreteYKeyPath = try XCTUnwrap(yKeyPaths[0] as? WritableKeyPath<Int?, Int>)
+    let concreteYKeyPath = try XCTUnwrap(
+      yKeyPaths[0] as? WritableKeyPath<Int?, Int>)
     XCTAssertEqual(y[keyPath: concreteYKeyPath], 3)
     y[keyPath: concreteYKeyPath] = 4
     XCTAssertEqual(y, 4)
@@ -121,11 +183,13 @@ final class SE0000_KeyPathReflectionTests: XCTestCase {
   func testStoredPropertyKeyPaths() throws {
     try StoredPropertyKeyPaths.testStruct()
     try StoredPropertyKeyPaths.testClass()
+    try StoredPropertyKeyPaths.testExistential()
   }
 
   func testCustomKeyPaths() throws {
     try CustomKeyPaths.testOptional()
     try CustomKeyPaths.testStruct()
+    try CustomKeyPaths.testExistential()
     try CustomKeyPaths.testClass()
     try CustomKeyPaths.testArray()
   }
