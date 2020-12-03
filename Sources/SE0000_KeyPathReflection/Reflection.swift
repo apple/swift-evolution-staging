@@ -19,15 +19,38 @@ public enum Reflection {
     guard let metadata = getMetadata(for: type) as? TypeMetadata else {
       return []
     }
-    
+
     var result = [PartialKeyPath<T>]()
     result.reserveCapacity(metadata.contextDescriptor.fields.numFields)
-    
+
     for i in 0 ..< metadata.contextDescriptor.fields.numFields {
       let keyPath = createKeyPath(root: metadata, leaf: i) as! PartialKeyPath<T>
       result.append(keyPath)
     }
     
+    return result
+  }
+
+  /// Returns the collection of all key paths of the existential metatype's
+  /// underlying type.
+  ///
+  /// - Parameter type: The static type to return the stored key paths of.
+  /// - Returns: An array of partial key paths for this type.
+  public static func allKeyPaths(
+    forUnderlyingTypeOf type: Any.Type
+  ) -> [AnyKeyPath] {
+    guard let metadata = getMetadata(for: type) as? TypeMetadata else {
+      return []
+    }
+
+    var result = [AnyKeyPath]()
+    result.reserveCapacity(metadata.contextDescriptor.fields.numFields)
+
+    for i in 0 ..< metadata.contextDescriptor.fields.numFields {
+      let keyPath = createKeyPath(root: metadata, leaf: i)
+      result.append(keyPath)
+    }
+
     return result
   }
   
@@ -45,6 +68,20 @@ public enum Reflection {
     
     // Otherwise, return stored property key paths.
     return allKeyPaths(for: T.self)
+  }
+
+  /// Returns the collection of all key paths of this value.
+  ///
+  /// - Parameter value: A value of any type to return the stored key paths of.
+  /// - Returns: An array of partial key paths for this value.
+  public static func allKeyPaths(for value: Any) -> [AnyKeyPath] {
+    // If the value conforms to `_KeyPathIterableBase`, return `allKeyPaths`.
+    if let keyPathIterable = value as? _KeyPathIterableBase {
+      return keyPathIterable._allKeyPathsTypeErased
+    }
+
+    // Otherwise, return stored property key paths.
+    return allKeyPaths(forUnderlyingTypeOf: type(of: value))
   }
   
   /// Returns the collection of all named key paths of this type.
@@ -70,6 +107,30 @@ public enum Reflection {
     
     return result
   }
+
+  /// Returns the collection of all named key paths of this type.
+  ///
+  /// - Parameter value: A value of any type to return the stored key paths of.
+  /// - Returns: An array of tuples with both the name and partial key path
+  ///            for this value.
+  public static func allNamedKeyPaths(
+    forUnderlyingTypeOf type: Any.Type
+  ) -> [(name: String, keyPath: AnyKeyPath)] {
+    guard let metadata = getMetadata(for: type) as? TypeMetadata else {
+      return []
+    }
+
+    var result = [(name: String, keyPath: AnyKeyPath)]()
+    result.reserveCapacity(metadata.contextDescriptor.fields.numFields)
+
+    for i in 0 ..< metadata.contextDescriptor.fields.numFields {
+      let name = metadata.contextDescriptor.fields.records[i].name
+      let keyPath = createKeyPath(root: metadata, leaf: i)
+      result.append((name: name, keyPath: keyPath))
+    }
+
+    return result
+  }
   
   /// Returns the collection of all named key paths of this value.
   ///
@@ -89,5 +150,23 @@ public enum Reflection {
     
     // Otherwise, return stored property key paths.
     return allNamedKeyPaths(for: T.self)
+  }
+
+  /// Returns the collection of all named key paths of this value.
+  ///
+  /// - Parameter value: A value of any type to return the stored key paths of.
+  /// - Returns: An array of tuples with both the name and partial key path
+  ///            for this value.
+  public static func allNamedKeyPaths(
+    for value: Any
+  ) -> [(name: String, keyPath: AnyKeyPath)] {
+    // If the value conforms to `_KeyPathIterableBase`, return
+    // `allNamedKeyPaths`.
+    if let keyPathIterable = value as? _KeyPathIterableBase {
+      return keyPathIterable._allNamedKeyPathsTypeErased.map { ($0, $1) }
+    }
+
+    // Otherwise, return stored property key paths.
+    return allNamedKeyPaths(forUnderlyingTypeOf: type(of: value))
   }
 }
