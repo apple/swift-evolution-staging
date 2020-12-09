@@ -19,7 +19,7 @@ struct Dog {
   let name: String
 }
 
-let dogKeyPaths = Reflection.allKeysPaths(for: Dog.self)
+let dogKeyPaths = Reflection.allKeyPaths(for: Dog.self)
 
 let sparky = Dog(age: 128, name: "Sparky")
 
@@ -47,7 +47,7 @@ add the following to your `Package.swift` file's dependencies:
 ```swift
 .package(
     url: "https://github.com/apple/swift-evolution-staging.git",
-    .branch("SE0000_KeyPathReflection")
+    .branch("reflection")
 )
 ```
 
