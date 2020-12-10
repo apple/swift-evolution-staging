@@ -1,51 +1,30 @@
-# Swift Evolution Staging
-
-This repository is the starting point for Swift Evolution proposal
-implementations. See the [Swift Evolution Process][se-process] to learn about
-how ideas are pitched, refined, and then proposed for inclusion in the Swift
-standard library.
-
-[se-process]: https://github.com/apple/swift-evolution/blob/master/process.md
-
-Complete this checklist when preparing your implementation:
-  
-- In `Package.swift` and in the _Introduction_ section below, rename your module
-  to use a short, camel-cased name of your proposed feature (ex: `SE0000_MyFeature`).
-  
-- Rename the folders and files in the `Sources` and `Tests` directories to match
-  your new module name.
-  
-- Implement your proposed feature in the `Sources` directory, and add tests in
-  the `Tests` directory.
-  
-- Make sure the Swift project code header is at the beginning of every source
-  file.
-  
-- Finish editing the section below, and then remove this checklist and
-  everything else above the line. That's it!
-
---------------------------------------------------------------------------------
-
-# Package Name
+# IsPower
 
 > **Note:** This package is a part of a Swift Evolution proposal for
   inclusion in the Swift standard library, and is not intended for use in
   production code at this time.
 
-* Proposal: [SE-NNNN](https://github.com/apple/swift-evolution/proposals/NNNN-filename.md)
-* Author(s): [Author 1](https://github.com/author1), [Author 2](https://github.com/author1)
+* Proposal: [SE-0288](https://github.com/apple/swift-evolution/blob/main/proposals/0288-binaryinteger-ispower.md)
+* Author: [Ding Ye](https://github.com/dingobye)
 
 
 ## Introduction
 
-A short description of the proposed library. 
-Provide examples and describe how they work.
+This package adds a public API `isPower(of:)`, as an extension method, to the
+`BinaryInteger` protocol. It checks if an integer is power of another.
 
 ```swift
-import SE0000_PackageName
+import SE0288_IsPower
 
-print(Placeholder.message)
-// Prints("Hello, world!")
+let x: Int = Int.random(in: 0000..<0288)
+1.isPower(of: x)      // 'true' since x^0 == 1
+
+let y: UInt = 1000
+y.isPower(of: 10)  // 'true' since 10^3 == 1000
+
+(-1).isPower(of: 1)   // 'false'
+
+(-32).isPower(of: -2) // 'true' since (-2)^5 == -32
 ```
 
 
@@ -57,7 +36,7 @@ add the following to your `Package.swift` file's dependencies:
 ```swift
 .package(
     url: "https://github.com/apple/swift-evolution-staging.git",
-    .branch("SE0000_PackageName")),
+    .branch("SE0288_IsPower")),
 ```
 
 
