@@ -80,4 +80,16 @@ final class SE0288_IsPowerTests: XCTestCase {
     doTest(type: UInt32.self)
     doTest(type: UInt64.self)
   }
+
+  func testDifferentBaseTypes() {
+    XCTAssertTrue(Int16(256).isPower(of: UInt16(2)))
+    XCTAssertTrue(UInt16(256).isPower(of: Int16(-2)))
+
+    XCTAssertTrue(Int16(256).isPower(of: UInt32(0x00000002)))
+    XCTAssertFalse(Int16(256).isPower(of: UInt32(0xffff0002)))
+
+    // The following statement triggers a runtime error:
+    //    Fatal error: isPower(:of) cannot be applied to self (225 of type 'UInt8') and base (-15 of type 'Int8'), because neither 'UInt8' nor 'Int8' can represent the other value.
+    // XCTAssertTrue(UInt8(225).isPower(of: Int8(-15)))
+  }
 }

@@ -28,7 +28,7 @@ extension BinaryInteger {
   ///
   /// - Parameter base: The base value to test.
   @_alwaysEmitIntoClient
-  public func isPower(of base: Self) -> Bool {
+  public func isPower<Base: BinaryInteger>(of base: Base) -> Bool {
     // Fast path when base is one of the common cases.
     if base == 2 { return self._isPowerOfTwo }
     if base == 10 { return self._isPowerOfTen }
@@ -73,7 +73,7 @@ extension BinaryInteger {
   /// This serves as a fast path for `isPower(of:)` when the input base itself
   /// is a power of two.
   @_alwaysEmitIntoClient
-  internal func _isPowerOf(powerOfTwo base: Self) -> Bool {
+  internal func _isPowerOf<Base: BinaryInteger>(powerOfTwo base: Base) -> Bool {
     precondition(base._isPowerOfTwo)
     guard self._isPowerOfTwo else { return false }
     return self.trailingZeroBitCount.isMultiple(of: base.trailingZeroBitCount)
@@ -136,6 +136,25 @@ extension BinaryInteger {
 
       // Now time for the slow path.
       return self._slowIsPower(of: 10)
+    }
+  }
+
+  /// Returns `true` iff `self` is a power of the given `base`.
+  ///
+  /// This serves as the slow path for `isPower(of:)` when `Self` and `Base`
+  /// are different types.
+  @_alwaysEmitIntoClient
+  internal func _slowIsPower<Base: BinaryInteger>(of base: Base) -> Bool {
+    if let baseAsSelf = Self(exactly: base) {
+      return _slowIsPower(of: baseAsSelf)
+    } else if let selfAsBase = Base(exactly: self) {
+      return selfAsBase._slowIsPower(of: base)
+    } else {
+      preconditionFailure("isPower(:of) cannot be applied to " +
+        "self (\(self) of type '\(Self.self)') and " +
+        "base (\(base) of type '\(Base.self)'), " +
+        "because neither '\(Self.self)' nor '\(Base.self)' " +
+        "can represent the other value.")
     }
   }
 
