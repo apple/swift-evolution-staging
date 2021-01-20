@@ -55,7 +55,8 @@ extension Optional: KeyPathIterable {
     if self == nil {
         return []
     } else {
-        return [("value", \Optional.!)]
+        let o = \Optional.! as PartialKeyPath<Optional>
+        return [("value", o)]
     }
   }
 }
