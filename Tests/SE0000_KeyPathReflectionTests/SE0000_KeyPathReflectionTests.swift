@@ -153,9 +153,13 @@ enum CustomKeyPaths {
     XCTAssertTrue(Reflection.allKeyPaths(for: x).isEmpty)
     var y: Int? = 3
     let yKeyPaths = Reflection.allKeyPaths(for: y)
+
+//    let a = \Optional. as? PartialKeyPath<Int?>
+   // XCTAssertEqual(yKeyPaths, [a])
+    //XCTAssertEqual(yKeyPaths, [\Optional.!])
     XCTAssertEqual(yKeyPaths, [\Optional.!])
-    let concreteYKeyPath = try XCTUnwrap(
-      yKeyPaths[0] as? WritableKeyPath<Int?, Int>)
+    let ykpf = yKeyPaths[0]
+    let concreteYKeyPath = try XCTUnwrap(ykpf as? WritableKeyPath<Int?, Int>)
     XCTAssertEqual(y[keyPath: concreteYKeyPath], 3)
     y[keyPath: concreteYKeyPath] = 4
     XCTAssertEqual(y, 4)

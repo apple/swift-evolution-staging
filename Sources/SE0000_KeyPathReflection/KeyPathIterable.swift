@@ -52,8 +52,11 @@ internal func areWritable<Root, Value>(
 
 extension Optional: KeyPathIterable {
   public var allNamedKeyPaths: [(name: String, keyPath: PartialKeyPath<Optional>)] {
-    let result = self == nil ? [] : [("value", \Optional.!)]
-    return result
+    if self == nil {
+        return []
+    } else {
+        return [("value", \Optional.!)]
+    }
   }
 }
 
