@@ -55,8 +55,25 @@ extension Optional: KeyPathIterable {
     if self == nil {
         return []
     } else {
-        let o = \Optional.! as PartialKeyPath<Optional>
-        return [("value", o)]
+        let u = self.unsafelyUnwrapped
+        let ag = Reflection.allKeyPaths(for: u)
+        //let w = self.unsafelyUnwrapped.all
+        //let o = \Optional.unsafelyUnwrapped as? KeyPath<Optional, Wrapped>
+        //let o = \Optional.unsafelyUnwrapped as! KeyPath<Optional, Wrapped>
+        //let i = \Optional.!
+        print(self.unsafelyUnwrapped)
+//        print(Self.none)
+//        print(Self.some(self.))
+
+        let a : KeyPath<Optional<Wrapped>, Wrapped> = \Optional.unsafelyUnwrapped
+
+        let r = \Optional.self
+        //let x = \Optional.!
+        //let o = r as! WritableKeyPath<Wrapped?, Wrapped>
+
+        //let o = \Optional.unsafelyUnwrapped as! WritableKeyPath<Self, \Optional.self>
+        //let o = \Optional.unsafelyUnwrapped as! WritableKeyPath<Optional<Wrapped>, Wrapped>
+        return [("value", r)]
     }
   }
 }

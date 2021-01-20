@@ -149,6 +149,9 @@ enum CustomKeyPaths {
   }
 
   static func testOptional() throws {
+    let a: Int = 2
+    let res = Reflection.allKeyPaths(for: a)
+
     let x: Int? = nil
     XCTAssertTrue(Reflection.allKeyPaths(for: x).isEmpty)
     var y: Int? = 3
@@ -157,9 +160,9 @@ enum CustomKeyPaths {
 //    let a = \Optional. as? PartialKeyPath<Int?>
    // XCTAssertEqual(yKeyPaths, [a])
     //XCTAssertEqual(yKeyPaths, [\Optional.!])
-    XCTAssertEqual(yKeyPaths, [\Optional.!])
+    //XCTAssertEqual(yKeyPaths, [\Optional.unsafelyUnwrapped])
     let ykpf = yKeyPaths[0]
-    let concreteYKeyPath = try XCTUnwrap(ykpf as? WritableKeyPath<Int?, Int>)
+    let concreteYKeyPath = try XCTUnwrap(ykpf as? WritableKeyPath<Optional<Int>, Int?>)
     XCTAssertEqual(y[keyPath: concreteYKeyPath], 3)
     y[keyPath: concreteYKeyPath] = 4
     XCTAssertEqual(y, 4)
