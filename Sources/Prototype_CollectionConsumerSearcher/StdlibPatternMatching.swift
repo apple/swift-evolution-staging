@@ -38,6 +38,16 @@ extension StdlibPattern {
     }
     return nil
   }
+  
+  func callAsFunction<R: RangeExpression>(_ range: () -> R) -> RepeatMatch<Self>
+    where R.Bound == Int
+  {
+    let limitsRange = range().relative(to: 0..<Int.max)
+    let limits = limitsRange.upperBound == .max
+      ? limitsRange.lowerBound ... .max
+      : limitsRange.lowerBound ... limitsRange.upperBound - 1
+    return RepeatMatch(singlePattern: self, repeatLimits: limits)
+  }
 }
 
 // FIXME: Using this matcher for found(in:) has worst-case performance
@@ -143,7 +153,7 @@ struct RepeatMatch<M0: StdlibPattern> : StdlibPattern {
   where C.Index == M0.Index, C.Element == M0.Element
   {
     var lastEnd = c.startIndex
-    var rest = c.dropFirst(0)
+    var rest = c[...]
     var data: MatchData = []
 
   searchLoop:
@@ -152,7 +162,7 @@ struct RepeatMatch<M0: StdlibPattern> : StdlibPattern {
       case .found(let end, let foundData):
         data.append((end, foundData))
         lastEnd = end
-        if data.count == repeatLimits.upperBound { break }
+        if data.count == repeatLimits.upperBound { break searchLoop }
         rest = rest[end..<rest.endIndex]
       case .notFound(let r):
         if !repeatLimits.contains(data.count)  {
@@ -174,9 +184,9 @@ extension RepeatMatch : CustomStringConvertible {
     case (1, Int.max):
       suffix = "+"
     case (let l, Int.max):
-      suffix = "{\(l)...}"
-    default:
-      suffix = "\(repeatLimits)"
+      suffix = "{\(l):}"
+    case (let l, let r):
+      suffix = "{\(l):\(r)}"
     }
     return "(\(singlePattern))\(suffix)"
   }
