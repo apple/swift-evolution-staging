@@ -6,6 +6,9 @@ let package = Package(
     name: "Prototype_CollectionConsumerSearcher",
     products: [
         .library(
+            name: "CollectionConsumerSearcher",
+            targets: ["CollectionConsumerSearcher"]),
+        .library(
             name: "Prototype_CollectionConsumerSearcher",
             targets: ["Prototype_CollectionConsumerSearcher"]),
     ],
