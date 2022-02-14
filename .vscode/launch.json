@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Test key-path-reflection",
+            "program": "/Applications/Xcode-13.3.0-Beta.2.app/Contents/Developer/usr/bin/xctest",
+            "args": [
+                ".build/debug/key-path-reflectionPackageTests.xctest"
+            ],
+            "cwd": "${workspaceFolder:swift-evolution-staging}",
+            "preLaunchTask": "swift: Build All"
+        }
+    ]
+}

@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 // Source: swift/include/swift/Basic/RelativePointer.h
-import KeyPathReflection_CShims
+import KeyPathReflectionCShims
 
 extension UnsafeRawPointer {
   /// Returns the underlying raw pointer by stripping the pointer authentication signature.

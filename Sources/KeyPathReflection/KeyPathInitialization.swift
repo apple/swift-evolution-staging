@@ -10,7 +10,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import KeyPathReflection_CShims
+import KeyPathReflectionCShims
 
 // This is a utility within KeyPath.swift in the standard library. If this
 // gets moved into there, then this goes away, but will have to rethink if this

@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.6
 //===----------------------------------------------------------------------===//
 //
 // This source file is part of the Swift.org open source project
@@ -14,23 +14,23 @@
 import PackageDescription
 
 let package = Package(
-  name: "SE0000_KeyPathReflection",
+  name: "key-path-reflection",
   products: [
     .library(
-      name: "SE0000_KeyPathReflection",
-      targets: ["SE0000_KeyPathReflection"]),
+      name: "KeyPathReflection",
+      targets: ["KeyPathReflection"]),
   ],
   dependencies: [
   ],
   targets: [
-    .target(name: "KeyPathReflection_CShims"),
+    .target(name: "KeyPathReflectionCShims"),
     .target(
-      name: "SE0000_KeyPathReflection",
-      dependencies: ["KeyPathReflection_CShims"]
+      name: "KeyPathReflection",
+      dependencies: ["KeyPathReflectionCShims"]
     ),
     .testTarget(
-      name: "SE0000_KeyPathReflectionTests",
-      dependencies: ["SE0000_KeyPathReflection"]
+      name: "KeyPathReflectionTests",
+      dependencies: ["KeyPathReflection"]
     ),
   ]
 )
