@@ -51,4 +51,21 @@ add the following to your `Package.swift` file's dependencies:
 )
 ```
 
+## Local
 
+#### Build with tests
+`swift build --build-tests`
+
+#### Run Tests with Docker
+`swift test --skip-build`
+
+## Docker
+
+#### Build Tests with Docker
+`docker-compose -f "docker-compose.test.yml" build`
+
+#### Run Tests with Docker
+`docker-compose -f "docker-compose.test.yml" up --abort-on-container-exit --exit-code-from app`
+
+## Prune
+`docker system prune --all --volumes`

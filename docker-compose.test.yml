@@ -1,0 +1,20 @@
+version: "3.8" # version of docker compose file
+
+services:
+
+  # app
+  app:
+    image: app
+    build:
+      context: ./
+      dockerfile: test.Dockerfile
+    depends_on:
+      - db
+    networks:
+      - app-network
+    command: ["swift", "test", "--skip-build"]
+
+# networks
+networks:
+  app-network:
+    driver: bridge

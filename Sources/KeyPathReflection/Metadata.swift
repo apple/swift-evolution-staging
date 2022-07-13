@@ -228,8 +228,10 @@ internal struct ClassMetadata: TypeMetadata, LayoutWrapper {
 internal struct _ClassMetadata {
   let _kind: Int
   let _superclass: Any.Type?
+#if !swift(>=5.4) || canImport(ObjectiveC)
   let _reserved: (Int, Int)
   let _rodata: Int
+#endif
   let _flags: UInt32
   let _instanceAddressPoint: UInt32
   let _instanceSize: UInt32
