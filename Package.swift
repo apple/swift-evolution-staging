@@ -1,34 +1,33 @@
-// swift-tools-version:5.1
-//===----------------------------------------------------------------------===//
-//
-// This source file is part of the Swift.org open source project
-//
-// Copyright (c) 2019 Apple Inc. and the Swift project authors
-// Licensed under Apache License v2.0 with Runtime Library Exception
-//
-// See https://swift.org/LICENSE.txt for license information
-// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//
-//===----------------------------------------------------------------------===//
+// swift-tools-version: 5.9
+// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-  name: "SE0000_PackageName",
-  products: [
-    .library(
-      name: "SE0000_PackageName",
-      targets: ["SE0000_PackageName"]),
-  ],
-  dependencies: [
-  ],
-  targets: [
-    .target(
-      name: "SE0000_PackageName",
-      dependencies: []),
-    
-    .testTarget(
-      name: "SE0000_PackageNameTests",
-      dependencies: ["SE0000_PackageName"]),
-  ]
+    name: "SEnnnn_inputValidatingStringInitializers",
+    platforms: [.macOS(.v14)],
+    products: [
+        // Products define the executables and libraries a package produces, making them visible to other packages.
+        .library(
+            name: "SEnnnn_inputValidatingStringInitializers",
+            targets: ["SEnnnn_inputValidatingStringInitializers"]),
+    ],
+    targets: [
+        // Targets are the basic building blocks of a package, defining a module or a test suite.
+        // Targets can depend on other targets in this package and products from dependencies.
+        .target(
+            name: "SEnnnn_inputValidatingStringInitializers",
+            swiftSettings: [
+              .unsafeFlags(
+                [
+                  "-Xfrontend", "-disable-access-control", "-enable-builtin-module"
+                ],
+                .when(platforms: [.macOS])
+              )
+            ]
+        ),
+        .testTarget(
+            name: "SEnnnn_inputValidatingStringInitializerTests",
+            dependencies: ["SEnnnn_inputValidatingStringInitializers"]),
+    ]
 )
