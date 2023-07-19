@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 import XCTest
-import SEnnnn_inputValidatingStringInitializers
+import SE0000inputValidatingStringInitializers
 
 let s1 = "Long string containing the characters é, ß, 🦆, and 👨‍👧‍👦."
 let s2 = "Long ascii string with no accented characters (obviously)."

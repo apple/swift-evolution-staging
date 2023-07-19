@@ -11,7 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 import XCTest
-import SEnnnn_inputValidatingStringInitializers
+import SE0000inputValidatingStringInitializers
 
 final class StringValidationSnippets: XCTestCase {
   

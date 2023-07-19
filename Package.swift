@@ -9,14 +9,14 @@ let package = Package(
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "SEnnnn_inputValidatingStringInitializers",
-            targets: ["SEnnnn_inputValidatingStringInitializers"]),
+            name: "SE0000inputValidatingStringInitializers",
+            targets: ["SE0000inputValidatingStringInitializers"]),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "SEnnnn_inputValidatingStringInitializers",
+            name: "SE0000inputValidatingStringInitializers",
             swiftSettings: [
               .unsafeFlags(
                 [
@@ -27,7 +27,7 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "SEnnnn_inputValidatingStringInitializerTests",
-            dependencies: ["SEnnnn_inputValidatingStringInitializers"]),
+            name: "SE0000inputValidatingStringInitializerTests",
+            dependencies: ["SE0000inputValidatingStringInitializers"]),
     ]
 )
