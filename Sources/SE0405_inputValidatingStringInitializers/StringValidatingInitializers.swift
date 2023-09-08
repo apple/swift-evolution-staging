@@ -14,7 +14,7 @@ import Swift
 
 extension String {
 
-  /// Create a new `String` by copying and validating the sequence of
+  /// Creates a new `String` by copying and validating the sequence of
   /// code units passed in, according to the specified encoding.
   ///
   /// This initializer does not try to repair ill-formed code unit sequences.
@@ -24,7 +24,7 @@ extension String {
   /// different arrays---first with a well-formed UTF-8 code unit sequence and
   /// then with an ill-formed UTF-16 code unit sequence.
   ///
-  ///     let validUTF8: [UInt8] = [67, 97, 102, 195, 169]
+  ///     let validUTF8: [UInt8] = [67, 97, 0, 102, 195, 169]
   ///     let valid = String(validating: validUTF8, as: UTF8.self)
   ///     print(valid)
   ///     // Prints "Optional("Café")"
@@ -34,9 +34,9 @@ extension String {
   ///     print(invalid)
   ///     // Prints "nil"
   ///
-  /// - Parameters
+  /// - Parameters:
   ///   - codeUnits: A sequence of code units that encode a `String`
-  ///   - encoding: An implementation of `Unicode.Encoding` that should be used
+  ///   - encoding: A conformer to `Unicode.Encoding` to be used
   ///               to decode `codeUnits`.
   @inlinable
   public init?<Encoding: Unicode.Encoding>(
@@ -128,71 +128,58 @@ extension String {
 
 extension String {
 
-  /// Create a new `String` by copying and validating the sequence of
-  /// UTF-8 code units passed in.
+  /// Creates a new `String` by copying and validating the sequence of
+  /// `Int8` passed in, according to the specified encoding.
   ///
   /// This initializer does not try to repair ill-formed code unit sequences.
   /// If any are found, the result of the initializer is `nil`.
   ///
   /// The following example calls this initializer with the contents of two
   /// different arrays---first with a well-formed UTF-8 code unit sequence and
-  /// then with an ill-formed code unit sequence.
+  /// then with an ill-formed ASCII code unit sequence.
   ///
-  ///     let validUTF8: [UInt8] = [67, 97, 102, 195, 169]
-  ///     let valid = String.init(validatingAsUTF8: validUTF8)
+  ///     let validUTF8: [Int8] = [67, 97, 0, 102, -61, -87]
+  ///     let valid = String(validating: validUTF8, as: UTF8.self)
   ///     print(valid)
   ///     // Prints "Optional("Café")"
   ///
-  ///     let invalidUTF8: [UInt8] = [67, 195, 0]
-  ///     let invalid = String.init(validatingAsUTF8: invalidUTF8)
+  ///     let invalidASCII: [Int8] = [67, 97, -5]
+  ///     let invalid = String(validating: invalidASCII, as: Unicode.ASCII.self)
   ///     print(invalid)
   ///     // Prints "nil"
   ///
-  /// - Parameters
+  /// - Parameters:
   ///   - codeUnits: A sequence of code units that encode a `String`
-  public init?(validatingAsUTF8 codeUnits: some Sequence<UTF8.CodeUnit>) {
-    guard let s = String(validating: codeUnits, as: UTF8.self)
-    else { return nil }
-    self = s
-  }
-  
-  /// Create a new `String` by copying and validating the sequence of `CChar`
-  /// passed in, by interpreting them as UTF-8 code units.
-  ///
-  /// This initializer does not try to repair ill-formed code unit sequences.
-  /// If any are found, the result of the initializer is `nil`.
-  ///
-  /// The following example calls this initializer with the contents of two
-  /// different `CChar` arrays---first with a well-formed UTF-8 code unit
-  /// sequence and then with an ill-formed code unit sequence.
-  ///
-  ///     let validUTF8: [CChar] = [67, 97, 0, 102, -61, -87]
-  ///     let valid = validUTF8.withUnsafeBufferPointer {
-  ///         String.init(validatingAsUTF8: $0)
-  ///     }
-  ///     print(valid)
-  ///     // Prints "Optional("Café")"
-  ///
-  ///     let invalidUTF8: [CChar] = [67, -61, 0]
-  ///     let invalid = invalidUTF8.withUnsafeBufferPointer {
-  ///         String.init(validatingAsUTF8: $0)
-  ///     }
-  ///     print(invalid)
-  ///     // Prints "nil"
-  ///
-  /// - Parameters
-  ///   - codeUnits: A sequence of code units that encode a `String`
-  public init?(validatingAsUTF8 codeUnits: UnsafeBufferPointer<CChar>) {
-    let s = codeUnits.withMemoryRebound(to: UTF8.CodeUnit.self) {
-      String(_validating: $0, as: UTF8.self)
+  ///   - encoding: A conformer to `Unicode.Encoding` that can decode
+  ///               `codeUnits` as `UInt8`
+  @inlinable
+  public init?<Encoding>(
+    validating codeUnits: some Sequence<Int8>,
+    as encoding: Encoding.Type
+  ) where Encoding: Unicode.Encoding, Encoding.CodeUnit == UInt8 {
+    let newString: String?? = codeUnits.withContiguousStorageIfAvailable {
+      $0.withMemoryRebound(to: UInt8.self) {
+        String(_validating: $0, as: Encoding.self)
+      }
     }
-    guard let s else { return nil }
-    self = s
+    if let newString {
+      guard let newString else { return nil }
+      self = newString
+      return
+    }
+
+    // slow-path
+    let rebound = codeUnits.lazy.map(UInt8.init(bitPattern:))
+    if let string = String(validating: rebound, as: Encoding.self) {
+      self = string
+      return
+    }
+    return nil
   }
 }
 
 extension String {
-  /// Create a new string by copying and validating the null-terminated UTF-8
+  /// Creates a new string by copying and validating the null-terminated UTF-8
   /// data referenced by the given pointer.
   ///
   /// This initializer does not try to repair ill-formed UTF-8 code unit
@@ -218,7 +205,9 @@ extension String {
   ///     // Prints "nil"
   ///
   /// - Parameter cString: A pointer to a null-terminated UTF-8 code sequence.
-  public init?(validatingCString nullTerminatedCodeUnits: UnsafePointer<CChar>) {
+  public init?(
+    validatingCString nullTerminatedCodeUnits: UnsafePointer<CChar>
+  ) {
     guard let s = String(validatingUTF8: nullTerminatedCodeUnits)
     else { return nil }
     self = s
