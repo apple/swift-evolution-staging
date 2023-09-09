@@ -44,7 +44,7 @@ extension String {
     as encoding: Encoding.Type
   ) {
     let newString: String?? = codeUnits.withContiguousStorageIfAvailable {
-      String(_validating: $0, as: Encoding.self)
+      String._validate($0, as: Encoding.self)
     }
     if let newString {
       guard let newString else { return nil }
@@ -74,12 +74,13 @@ extension String {
   }
 
   @usableFromInline
-  internal init?<Encoding: Unicode.Encoding>(
-    _validating input: UnsafeBufferPointer<Encoding.CodeUnit>,
+  internal static func _validate<Encoding: Unicode.Encoding>(
+    _ input: UnsafeBufferPointer<Encoding.CodeUnit>,
     as encoding: Encoding.Type
-  ) {
+  ) -> String? {
     //TODO: Validate and copy in chunks of up to some cachable amount of memory.
-  fast: if encoding.CodeUnit.self == UInt8.self {
+  fast: // fast-path
+    if encoding.CodeUnit.self == UInt8.self {
       let bytes = _identityCast(input, to: UnsafeBufferPointer<UInt8>.self)
       let isASCII: Bool
       if encoding.self == UTF8.self {
@@ -91,15 +92,13 @@ extension String {
       } else {
         break fast
       }
-      self = String._uncheckedFromUTF8(bytes, asciiPreScanResult: isASCII)
-      return
+      return String._uncheckedFromUTF8(bytes, asciiPreScanResult: isASCII)
     }
     
-    // there must be a better way to get this multiplier
-    let multiplier = if encoding.self == UTF16.self { 3 } else { 4 }
-
     // slow-path
-    let newString = withUnsafeTemporaryAllocation(
+    // this multiplier is a worst-case estimate
+    let multiplier = if encoding.self == UTF16.self { 3 } else { 4 }
+    return withUnsafeTemporaryAllocation(
       of: UInt8.self, capacity: input.count * multiplier
     ) {
       output -> String? in
@@ -121,8 +120,6 @@ extension String {
       let bytes = UnsafeBufferPointer(start: output.baseAddress, count: index)
       return String._uncheckedFromUTF8(bytes, asciiPreScanResult: isASCII)
     }
-    guard let newString else { return nil }
-    self = newString
   }
 }
 
@@ -159,7 +156,7 @@ extension String {
   ) where Encoding: Unicode.Encoding, Encoding.CodeUnit == UInt8 {
     let newString: String?? = codeUnits.withContiguousStorageIfAvailable {
       $0.withMemoryRebound(to: UInt8.self) {
-        String(_validating: $0, as: Encoding.self)
+        String._validate($0, as: Encoding.self)
       }
     }
     if let newString {
