@@ -169,12 +169,10 @@ extension String {
     }
 
     // slow-path
-    let rebound = codeUnits.lazy.map(UInt8.init(bitPattern:))
-    if let string = String(validating: rebound, as: Encoding.self) {
-      self = string
-      return
-    }
-    return nil
+    let uint8s = codeUnits.lazy.map(UInt8.init(bitPattern:))
+    let string = String(validating: uint8s, as: Encoding.self)
+    guard let string else { return nil }
+    self = string
   }
 }
 
