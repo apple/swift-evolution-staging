@@ -167,9 +167,7 @@ extension String {
 
     // slow-path
     let uint8s = codeUnits.lazy.map(UInt8.init(bitPattern:))
-    let string = String(validating: uint8s, as: Encoding.self)
-    guard let string else { return nil }
-    self = string
+    self.init(validating: uint8s, as: Encoding.self)
   }
 }
 
@@ -203,8 +201,6 @@ extension String {
   public init?(
     validatingCString nullTerminatedCodeUnits: UnsafePointer<CChar>
   ) {
-    guard let s = String(validatingUTF8: nullTerminatedCodeUnits)
-    else { return nil }
-    self = s
+    self.init(validatingUTF8: nullTerminatedCodeUnits)
   }
 }
